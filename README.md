@@ -1,10 +1,4 @@
-###
-## Comparative performance evaluation of sorting algorithms
-
-Author: Kejie Zhang
-November 28th,2017
-
-
+# Comparative Performance Evaluation of Sorting Algorithms
 
 ## Abstract
 
@@ -116,14 +110,13 @@ Quick sort needs extra space to recursive function calls, usually in worst case 
 
 From the previous result we can get the conclusions as follows:
 
-1.
-1.For the random array, the insertion sort performances the worst. Since it is an O(n2) algorithm, it will cost much more time and comparison times to sort. While the merge sort, quick sort and optimized quick sort performance pretty well, we can see that they have a O(nlogn) time-complexity.
-2.
-2.For the sorted array, it is the worst case for quick sort and we can see how bad it is, it becomes an O(n2) algorithm and it is really slow. Insertion sort, merge sort and optimized quick sort are still O(nlogn) algorithm. On the contrary, the insertion sort behaves pretty well in sorted situation. At the mean time, we can see that the solutions we made to optimized quick sort is obvious and efficient, the number of comparisons and time cost reduce dramatically.
-3.
-3.For the reversed sort, it is the worst case for quick sort and we can see it has the same time complexity with insertion sort, both are O(n2). They behave very bad in this situation. In other way, merge sort and optimized quick sort performance very well, they have the same complexity of O(nlogn).
-4.
-4.For the duplicated array, the insertion sort and quick sort performs bad, they are both O(n2) algorithm. And merge sort and the optimized quick sort still behave as O(nlogn).
+1. For the random array, the insertion sort performances the worst. Since it is an O(n2) algorithm, it will cost much more time and comparison times to sort. While the merge sort, quick sort and optimized quick sort performance pretty well, we can see that they have a O(nlogn) time-complexity.
+
+2. For the sorted array, it is the worst case for quick sort and we can see how bad it is, it becomes an O(n2) algorithm and it is really slow. Insertion sort, merge sort and optimized quick sort are still O(nlogn) algorithm. On the contrary, the insertion sort behaves pretty well in sorted situation. At the mean time, we can see that the solutions we made to optimized quick sort is obvious and efficient, the number of comparisons and time cost reduce dramatically.
+
+3. For the reversed sort, it is the worst case for quick sort and we can see it has the same time complexity with insertion sort, both are O(n2). They behave very bad in this situation. In other way, merge sort and optimized quick sort performance very well, they have the same complexity of O(nlogn).
+
+4. For the duplicated array, the insertion sort and quick sort performs bad, they are both O(n2) algorithm. And merge sort and the optimized quick sort still behave as O(nlogn).
 
 We can see that insertion sort is good for sorted array, however, since this situation is so rare in practice, we do not want to use it in big size of input array. Merge sort is stable and trustful, it will remain in O(nlogn) in best, average and worst case. Quick sort is not stable and trustful, it can perform well in average case, however, will performs really bad in worst-case, which is sorted, reversed and numerous duplications.
 
