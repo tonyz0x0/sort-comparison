@@ -13,6 +13,7 @@
 #include <random>
 #include <fstream>
 #include <pthread.h>
+#include <cmath>
 using namespace std;
 
 //Algorithms that are used
@@ -40,8 +41,8 @@ int main()
     vector<double> A7(50, 0);
     vector<float> A8(50, 0);
     unsigned int compare, time;
-    clock_t tempo1, tempo2, tempo3, tempo4;
-    unsigned int numComparisons1 = 0, numComparisons2 = 0, numComparisons3 = 0, numComparisons4 = 0;
+    clock_t tempo;
+    unsigned int numComparisons = 0;
     double meanTime;
     float meanCompare;
     ofstream data;
@@ -75,16 +76,16 @@ int main()
                 //printVector(A1);
 
                 //Using InsertionSort
-                insertionSort(A, numComparisons1, tempo1);
+                insertionSort(A, numComparisons, tempo);
                 //                cout << "The sorted array using insertion sort:" << endl;
                 //                printVector(A1);
                 //                cout << "The insertion sort time cost: " << endl;
-                //                printTime(tempo1);
+                //                printTime(tempo);
                 //                cout << "The insertion sort comparison times: " << endl;
-                //                printComparison(numComparisons1);
-                A7[i] = numComparisons1;
-                A8[i] = transferTime(tempo1);
-                numComparisons1 = 0;
+                //                printComparison(numComparisons);
+                A7[i] = numComparisons;
+                A8[i] = transferTime(tempo);
+                numComparisons = 0;
             }
             cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
@@ -95,16 +96,16 @@ int main()
             for (int i = 0; i < numRun; i++)
             {
                 populateVectorRandom(A, size, flag);
-                mergeSort(A, numComparisons2, tempo2);
+                mergeSort(A, numComparisons, tempo);
                 //                    cout << "The sorted array using merge sort:" << endl;
                 //                    printVector(A2);
                 //                    cout << "The merge sort time cost: " << endl;
-                //                    printTime(tempo2);
+                //                    printTime(tempo);
                 //                    cout << "The merge sort comparison times: " << endl;
-                //                    printComparison(numComparisons2);
-                A7[i] = numComparisons2;
-                A8[i] = transferTime(tempo2);
-                numComparisons2 = 0;
+                //                    printComparison(numComparisons);
+                A7[i] = numComparisons;
+                A8[i] = transferTime(tempo);
+                numComparisons = 0;
             }
             cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
@@ -116,16 +117,16 @@ int main()
             for (int i = 0; i < numRun; i++)
             {
                 populateVectorRandom(A, size, flag);
-                quickSort(A, numComparisons3, tempo3);
+                quickSort(A, numComparisons, tempo);
                 //                    cout << "The sorted array using basic quick sort:" << endl;
                 //                    printVector(A3);
                 //                    cout << "The quick sort time cost: " << endl;
-                //                    printTime(tempo3);
+                //                    printTime(tempo);
                 //                    cout << "The quick sort comparison times: " << endl;
-                //                    printComparison(numComparisons3);
-                A7[i] = numComparisons3;
-                A8[i] = transferTime(tempo3);
-                numComparisons3 = 0;
+                //                    printComparison(numComparisons);
+                A7[i] = numComparisons;
+                A8[i] = transferTime(tempo);
+                numComparisons = 0;
             }
             cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
@@ -137,16 +138,63 @@ int main()
             for (int i = 0; i < numRun; i++)
             {
                 populateVectorRandom(A, size, flag);
-                quickSortOpti(A, numComparisons4, tempo4);
+                quickSortOpti(A, numComparisons, tempo);
                 //                    cout << "The sorted array using optimized quick sort:" << endl;
                 //                    printVector(A4);
                 //                    cout << "The optimized quick sort time cost: " << endl;
-                //                    printTime(tempo4);
+                //                    printTime(tempo);
                 //                    cout << "The optimized quick sort comparison times: " << endl;
-                //                    printComparison(numComparisons4);
-                A7[i] = numComparisons4;
-                A8[i] = transferTime(tempo4);
-                numComparisons4 = 0;
+                //                    printComparison(numComparisons);
+                A7[i] = numComparisons;
+                A8[i] = transferTime(tempo);
+                numComparisons = 0;
+            }
+            cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
+            printResult(compare, time, meanTime, meanCompare);
+        }
+
+        //Using BucketSort
+        if (choice == 5)
+        {
+            for (int i = 0; i < numRun; i++)
+            {
+                populateVectorRandom(A, size, flag);
+                cout << "********************************************\n"
+                     << endl;
+                cout << "The unsorted array using BucketSort:" << endl;
+                printVector(A);
+
+                bucketSort(A, numComparisons, tempo);
+
+                cout << "********************************************\n"
+                     << endl;
+                cout << "The sorted array using BucketSort:" << endl;
+                printVector(A);
+
+                A7[i] = numComparisons;
+                A8[i] = transferTime(tempo);
+                numComparisons = 0;
+            }
+            cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
+            printResult(compare, time, meanTime, meanCompare);
+        }
+
+        //Using optimized QuickSort
+        if (choice == 6)
+        {
+            for (int i = 0; i < numRun; i++)
+            {
+                populateVectorRandom(A, size, flag);
+                bucketSort_pthreads(A, numComparisons, tempo);
+                //                    cout << "The sorted array using optimized quick sort:" << endl;
+                //                    printVector(A4);
+                //                    cout << "The optimized quick sort time cost: " << endl;
+                //                    printTime(tempo);
+                //                    cout << "The optimized quick sort comparison times: " << endl;
+                //                    printComparison(numComparisons);
+                A7[i] = numComparisons;
+                A8[i] = transferTime(tempo);
+                numComparisons = 0;
             }
             cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
@@ -237,7 +285,7 @@ void mergeSortSection(vector<int> &A, int start, int end, int temp[], unsigned i
 
 void mergeSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo)
 {
-    double size = A.size();
+    unsigned int size = A.size();
     int *temp = new int[size];
     clock_t start, end;
     start = clock();
@@ -375,6 +423,164 @@ void quickSortOpti(vector<int> &A, unsigned int &numComparisons, clock_t &tempo)
     tempo = end - start;
 }
 
+//*****************************************************
+//This section is an implement for BucketSort.
+//*****************************************************
+
+/**
+ * Implementation of bucket sort
+ */
+void bucketSortImple(std::vector<int> &A, unsigned int &numComparisons)
+{
+    unsigned int numOfElements = A.size();
+
+    // define num of bucket, this can choose different size
+    unsigned int bucketNum = std::floor(numOfElements / 2.0);
+    int minValue = A[0], maxValue = A[0];
+
+    for (int i = 0; i < numOfElements; i++)
+    {
+        if (A[i] > maxValue)
+        {
+            maxValue = A[i];
+        }
+        if (A[i] < minValue)
+        {
+            minValue = A[i];
+        }
+    }
+
+    // range of each bucket that will persist for the element in the array
+    double rangePerBucket = (maxValue - minValue + 1) / bucketNum;
+
+    std::vector<int> *buckets = new std::vector<int>[bucketNum];
+
+    for (int i = 0; i < bucketNum; i++)
+    {
+        buckets[i] = std::vector<int>();
+    }
+
+    // push each element into bucket
+    for (int i = 0; i < numOfElements; i++)
+    {
+
+        int bucketIndex = std::floor((A[i] - minValue) / rangePerBucket);
+
+        buckets[bucketIndex].push_back(A[i]);
+    }
+
+    // sort each bucket's element in specific sorting algorithm, here uses Insertion sort
+    for (int i = 0; i < bucketNum; i++)
+    {
+        if (buckets[i].size() > 0)
+        {
+            // insertionSortImple(buckets[i], 0, buckets[i].size(), numComparisons);
+            cout << "Each elements in bucket[" << i << "]: " << endl;
+            printVector(buckets[i]);
+        }
+    }
+
+    // reduce the elements back to original array
+    int index = 0;
+    for (int i = 0; i < bucketNum; i++)
+    {
+        for (int j = 0; j < buckets[i].size(); j++)
+        {
+            A[index++] = buckets[i][j];
+        }
+    }
+}
+
+void bucketSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo)
+{
+    unsigned int size = A.size();
+    clock_t start, end;
+    start = clock();
+    bucketSortImple(A, numComparisons);
+    end = clock();
+    tempo = end - start;
+}
+
+//*****************************************************
+//This section is an implement for parallel BucketSort using pthreads.
+//*****************************************************
+
+/**
+ * Implementation of parallel bucket sort using pthreads
+ */
+void bucketSort_pthreads_imple(std::vector<int> &A, double start, double end, unsigned int &numComparisons)
+{
+    unsigned int numOfElements = (unsigned int)(end - start + 1);
+
+    // define num of bucket, this can choose different size
+    unsigned int bucketNum = numOfElements / 2;
+    int minValue = 0, maxValue = 0;
+
+    for (int i = 0; i < numOfElements; i++)
+    {
+        if (A[i] > maxValue)
+        {
+            maxValue = A[i];
+        }
+        if (A[i] < minValue)
+        {
+            minValue = A[i];
+        }
+    }
+
+    // range of each bucket that will persist for the element in the array
+    double rangePerBucket = (maxValue - minValue + 1) / bucketNum;
+
+    std::vector<int> *buckets = new std::vector<int>[bucketNum];
+
+    for (int i = 0; i < bucketNum; i++)
+    {
+        buckets[i] = std::vector<int>();
+    }
+
+    // push each element into bucket
+    for (int i = 0; i < numOfElements; i++)
+    {
+
+        int bucketIndex = std::floor((A[i] - minValue) / rangePerBucket);
+
+        buckets[bucketIndex].push_back(A[i]);
+    }
+
+    // sort each bucket's element in specific sorting algorithm, here uses Insertion sort
+    for (int i = 0; i < bucketNum; i++)
+    {
+        if (buckets[i].size() > 0)
+        {
+            insertionSortImple(buckets[i], 0, buckets[i].size(), numComparisons);
+        }
+    }
+
+    // reduce the elements back to original array
+    int index = 0;
+    for (int i = 0; i < bucketNum; i++)
+    {
+        for (int j = 0; j < buckets[i].size(); j++)
+        {
+            A[index++] = buckets[i][j];
+        }
+    }
+}
+
+void bucketSort_pthreads(vector<int> &A, unsigned int &numComparisons, clock_t &tempo)
+{
+    unsigned int size = A.size();
+    clock_t start, end;
+    start = clock();
+    bucketSort_pthreads_imple(A, 0, size, numComparisons);
+    end = clock();
+    tempo = end - start;
+}
+
+/*****************************************************
+ * Helper functions
+ *****************************************************/
+
 //This section is to populate the Array with
 //integer numbers selected randomly and uniformly in the range [0, m].
 void populateVectorRandom(vector<int> &A, double m, int flag)
@@ -426,6 +632,11 @@ void printVector(vector<int> A)
     int n = 0;
     for (int &i : A)
     {
+        // Set a threshold to print
+        if (n >= 20) {
+            cout << "only showing "<< n << "elements, omit remainning......";
+            break;
+        }
         cout << i << "\t";
 
         //Each line with 5 elements.
