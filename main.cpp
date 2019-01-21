@@ -435,7 +435,7 @@ void bucketSortImple(std::vector<int> &A, unsigned int &numComparisons)
     unsigned int numOfElements = A.size();
 
     // define num of bucket, this can choose different size
-    unsigned int bucketNum = std::floor(numOfElements / 2.0);
+    unsigned int bucketNum = std::ceil(numOfElements / 2.0);
     int minValue = A[0], maxValue = A[0];
 
     for (int i = 0; i < numOfElements; i++)
@@ -451,7 +451,7 @@ void bucketSortImple(std::vector<int> &A, unsigned int &numComparisons)
     }
 
     // range of each bucket that will persist for the element in the array
-    double rangePerBucket = (maxValue - minValue + 1) / bucketNum;
+    double rangePerBucket = (maxValue - minValue + 1) / (double)bucketNum;
 
     std::vector<int> *buckets = new std::vector<int>[bucketNum];
 
@@ -474,9 +474,9 @@ void bucketSortImple(std::vector<int> &A, unsigned int &numComparisons)
     {
         if (buckets[i].size() > 0)
         {
-            // insertionSortImple(buckets[i], 0, buckets[i].size(), numComparisons);
-            cout << "Each elements in bucket[" << i << "]: " << endl;
-            printVector(buckets[i]);
+//            cout << "Each elements in bucket[" << i << "]: " << endl;
+            insertionSortImple(buckets[i], 0, buckets[i].size(), numComparisons);
+//            printVector(buckets[i]);
         }
     }
 
@@ -508,13 +508,13 @@ void bucketSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo)
 /**
  * Implementation of parallel bucket sort using pthreads
  */
-void bucketSort_pthreads_imple(std::vector<int> &A, double start, double end, unsigned int &numComparisons)
+void bucketSort_pthreads_imple(std::vector<int> &A, unsigned int &numComparisons)
 {
-    unsigned int numOfElements = (unsigned int)(end - start + 1);
+    unsigned int numOfElements = A.size();
 
     // define num of bucket, this can choose different size
-    unsigned int bucketNum = numOfElements / 2;
-    int minValue = 0, maxValue = 0;
+    unsigned int bucketNum = std::ceil(numOfElements / 2.0);
+    int minValue = A[0], maxValue = A[0];
 
     for (int i = 0; i < numOfElements; i++)
     {
@@ -529,7 +529,7 @@ void bucketSort_pthreads_imple(std::vector<int> &A, double start, double end, un
     }
 
     // range of each bucket that will persist for the element in the array
-    double rangePerBucket = (maxValue - minValue + 1) / bucketNum;
+    double rangePerBucket = (maxValue - minValue + 1) / (double)bucketNum;
 
     std::vector<int> *buckets = new std::vector<int>[bucketNum];
 
@@ -552,7 +552,9 @@ void bucketSort_pthreads_imple(std::vector<int> &A, double start, double end, un
     {
         if (buckets[i].size() > 0)
         {
+//            cout << "Each elements in bucket[" << i << "]: " << endl;
             insertionSortImple(buckets[i], 0, buckets[i].size(), numComparisons);
+//            printVector(buckets[i]);
         }
     }
 
@@ -572,7 +574,7 @@ void bucketSort_pthreads(vector<int> &A, unsigned int &numComparisons, clock_t &
     unsigned int size = A.size();
     clock_t start, end;
     start = clock();
-    bucketSort_pthreads_imple(A, 0, size, numComparisons);
+    bucketSort_pthreads_imple(A, numComparisons);
     end = clock();
     tempo = end - start;
 }
