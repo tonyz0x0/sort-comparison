@@ -1,10 +1,13 @@
 /*********************************
  * Algorithm-Comparison
  * 
- * DESCRIPTION: A collection of various sorting algorithms
+ * DESCRIPTION: A collection of various sorting algorithms and quantity evaluation methods
  *
  * Author: Kejie Zhang
  * LAST UPDATED: 01/20/2018
+ *
+ * USEFUL REFERENCE:
+ *    -> Pthreads: https://computing.llnl.gov/tutorials/pthreads/
 **********************************/
 
 #include <iostream>
@@ -15,6 +18,13 @@
 #include <pthread.h>
 #include <cmath>
 using namespace std;
+
+struct thread_data{
+    int thread_id;
+    int thread_total;
+    vector<int> *A;
+    unsigned int numComparisons;
+};
 
 //Algorithms that are used
 void insertionSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo);
@@ -35,7 +45,7 @@ float transferTime(clock_t &tempo);
 void cauculateConfidence(vector<double> &A, vector<float> &B, unsigned int &compare, unsigned int &time, double &meanTime, float &meanCompare);
 void printResult(unsigned int compare, unsigned int time, float meanTime, double meanComparison);
 
-//Sorting an Aay of n integers
+//Sorting an Array of n integers
 int main()
 {
     vector<double> A7(50, 0);
@@ -46,20 +56,27 @@ int main()
     double meanTime;
     float meanCompare;
     ofstream data;
-    unsigned int size, flag, choice, numRun;
+    unsigned int size, flag, choice, numRun, num_threads;
 
-    data.open("output.txt");
-    //if(data.is_open()) {
+//    data.open("output.txt");
+//    if(data.is_open()) {
     while (true)
     {
         cout << "Please select an algorithm to run:" << endl;
-        cout << "(1)insertion sort; (2)merge sort; (3)quick sort; (4)optimized quick sort" << endl;
-        cout << "(5)bucket sort; (6)parallel bucket sort(implemented in pthreads)" << endl;
+        cout << "   |-->(1) insertion sort\n"
+             << "   |-->(2) merge sort\n"
+             << "   |-->(3) quick sort\n"
+             << "   |-->(4) optimized quick sort\n"
+             << "   |-->(5) bucket sort\n"
+             << "   |-->(6) parallel bucket sort(implemented in pthreads)\n" << endl;
         cin >> choice;
         cout << "Please input the size of the array:" << endl;
         cin >> size;
         cout << "Please input the number: Which kind of initial array do you want?" << endl;
-        cout << "(1)random array; (2)sorted array; (3)reverse array; (4)numerous duplications" << endl;
+        cout << "   |-->(1) random array\n"
+             << "   |-->(2) sorted array\n"
+             << "   |-->(3) reverse array\n"
+             << "   |-->(4) numerous duplications\n" << endl;
         cin >> flag;
         cout << "How many times, N, do you want to run?" << endl;
         cin >> numRun;
@@ -179,19 +196,26 @@ int main()
             printResult(compare, time, meanTime, meanCompare);
         }
 
-        //Using optimized QuickSort
+        //Using pthreads parallel BucketSort
         if (choice == 6)
         {
             for (int i = 0; i < numRun; i++)
             {
                 populateVectorRandom(A, size, flag);
+
+                populateVectorRandom(A, size, flag);
+                cout << "********************************************\n"
+                     << endl;
+                cout << "The unsorted array using BucketSort:" << endl;
+                printVector(A);
+
                 bucketSort_pthreads(A, numComparisons, tempo);
-                //                    cout << "The sorted array using optimized quick sort:" << endl;
-                //                    printVector(A4);
-                //                    cout << "The optimized quick sort time cost: " << endl;
-                //                    printTime(tempo);
-                //                    cout << "The optimized quick sort comparison times: " << endl;
-                //                    printComparison(numComparisons);
+
+                cout << "********************************************\n"
+                     << endl;
+                cout << "The sorted array using BucketSort:" << endl;
+                printVector(A);
+
                 A7[i] = numComparisons;
                 A8[i] = transferTime(tempo);
                 numComparisons = 0;
@@ -506,6 +530,65 @@ void bucketSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo)
 //*****************************************************
 
 /**
+ * insertion sort wrapper with pthreads
+ */
+void* thread_insertion_sort(void* threadarg) {
+
+    struct thread_data *local_data = (struct thread_data *) threadarg;
+    unsigned int numComparisons = 0;
+    int partition = local_data->thread_id;
+    int thread_total = local_data->thread_total;
+    std::vector<int>* A = local_data->A;
+
+    // calculate the partition range
+    int range = A->size() / thread_total;
+    if(range * thread_total < A->size()) {
+        range += 1;
+    }
+
+    if(partition == thread_total - 1) {
+        insertionSortImple(*A, partition * range, A->size(), numComparisons);
+    } else {
+        insertionSortImple(*A, partition * range, (partition + 1) * range, numComparisons);
+    }
+
+    pthread_exit(NULL);
+}
+
+/**
+ * Worker threads creator
+ */
+
+void threads_factory(std::vector<int> &A, int num_threads) {
+    pthread_t threads[num_threads];
+    struct thread_data thread_data_array[num_threads];
+
+    // create threads and start work
+    for(int tid = 0; tid < num_threads; tid++) {
+        thread_data_array[tid].thread_id = tid;
+        thread_data_array[tid].A = &A;
+        thread_data_array[tid].thread_total = num_threads;
+
+        int rc = pthread_create(&threads[tid], NULL, thread_insertion_sort, (void *) &thread_data_array[tid]);
+
+        if (rc){
+            printf("ERROR; return code from pthread_create() is %d\n", rc);
+            exit(-1);
+        }
+    }
+
+    // wait for all threads to complete their work
+    for(int tid = 0; tid < num_threads; tid++) {
+        int rc = pthread_join(threads[tid], NULL);
+        if (rc)
+        {
+            printf("ERROR; return code from pthread_join() is %d\n", rc);
+            return;
+        }
+    }
+}
+
+/**
  * Implementation of parallel bucket sort using pthreads
  */
 void bucketSort_pthreads_imple(std::vector<int> &A, unsigned int &numComparisons)
@@ -546,17 +629,18 @@ void bucketSort_pthreads_imple(std::vector<int> &A, unsigned int &numComparisons
 
         buckets[bucketIndex].push_back(A[i]);
     }
-
-    // sort each bucket's element in specific sorting algorithm, here uses Insertion sort
-    for (int i = 0; i < bucketNum; i++)
-    {
-        if (buckets[i].size() > 0)
-        {
-//            cout << "Each elements in bucket[" << i << "]: " << endl;
-            insertionSortImple(buckets[i], 0, buckets[i].size(), numComparisons);
-//            printVector(buckets[i]);
-        }
-    }
+//
+//    // sort each bucket's element in specific sorting algorithm, here uses Insertion sort
+//    for (int i = 0; i < bucketNum; i++)
+//    {
+//        if (buckets[i].size() > 0)
+//        {
+////            cout << "Each elements in bucket[" << i << "]: " << endl;
+//            insertionSortImple(buckets[i], 0, buckets[i].size(), numComparisons);
+////            printVector(buckets[i]);
+//        }
+//    }
+    threads_factory(A, 2);
 
     // reduce the elements back to original array
     int index = 0;
