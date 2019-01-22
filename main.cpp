@@ -48,8 +48,6 @@ void printResult(unsigned int compare, unsigned int time, float meanTime, double
 //Sorting an Array of n integers
 int main()
 {
-    vector<double> A7(50, 0);
-    vector<float> A8(50, 0);
     unsigned int compare, time;
     clock_t tempo;
     unsigned int numComparisons = 0;
@@ -87,6 +85,8 @@ int main()
         cout << "Initializing....Running...." << endl;
 
         vector<int> A(size, 0);
+        vector<double> numComparisons_data(numRun, 0);
+        vector<float> time_data(numRun, 0);
 
         //insertion sort
         if (choice == 1)
@@ -105,11 +105,11 @@ int main()
                 //                printTime(tempo);
                 //                cout << "The insertion sort comparison times: " << endl;
                 //                printComparison(numComparisons);
-                A7[i] = numComparisons;
-                A8[i] = transferTime(tempo);
+                numComparisons_data[i] = numComparisons;
+                time_data[i] = transferTime(tempo);
                 numComparisons = 0;
             }
-            cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
+            cauculateConfidence(numComparisons_data, time_data, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
         }
         //Using MergeSort
@@ -125,11 +125,11 @@ int main()
                 //                    printTime(tempo);
                 //                    cout << "The merge sort comparison times: " << endl;
                 //                    printComparison(numComparisons);
-                A7[i] = numComparisons;
-                A8[i] = transferTime(tempo);
+                numComparisons_data[i] = numComparisons;
+                time_data[i] = transferTime(tempo);
                 numComparisons = 0;
             }
-            cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
+            cauculateConfidence(numComparisons_data, time_data, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
         }
 
@@ -146,11 +146,11 @@ int main()
                 //                    printTime(tempo);
                 //                    cout << "The quick sort comparison times: " << endl;
                 //                    printComparison(numComparisons);
-                A7[i] = numComparisons;
-                A8[i] = transferTime(tempo);
+                numComparisons_data[i] = numComparisons;
+                time_data[i] = transferTime(tempo);
                 numComparisons = 0;
             }
-            cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
+            cauculateConfidence(numComparisons_data, time_data, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
         }
 
@@ -167,11 +167,11 @@ int main()
                 //                    printTime(tempo);
                 //                    cout << "The optimized quick sort comparison times: " << endl;
                 //                    printComparison(numComparisons);
-                A7[i] = numComparisons;
-                A8[i] = transferTime(tempo);
+                numComparisons_data[i] = numComparisons;
+                time_data[i] = transferTime(tempo);
                 numComparisons = 0;
             }
-            cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
+            cauculateConfidence(numComparisons_data, time_data, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
         }
 
@@ -193,11 +193,11 @@ int main()
                 cout << "The sorted array using BucketSort:\n" << endl;
                 printVector(A);
 
-                A7[i] = numComparisons;
-                A8[i] = transferTime(tempo);
+                numComparisons_data[i] = numComparisons;
+                time_data[i] = transferTime(tempo);
                 numComparisons = 0;
             }
-            cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
+            cauculateConfidence(numComparisons_data, time_data, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
         }
 
@@ -221,11 +221,11 @@ int main()
                 cout << "The sorted array using BucketSort:" << endl;
                 printVector(A);
 
-                A7[i] = numComparisons;
-                A8[i] = transferTime(tempo);
+                numComparisons_data[i] = numComparisons;
+                time_data[i] = transferTime(tempo);
                 numComparisons = 0;
             }
-            cauculateConfidence(A7, A8, compare, time, meanTime, meanCompare);
+            cauculateConfidence(numComparisons_data, time_data, compare, time, meanTime, meanCompare);
             printResult(compare, time, meanTime, meanCompare);
         }
     }
