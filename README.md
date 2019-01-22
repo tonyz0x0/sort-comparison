@@ -1,5 +1,73 @@
 # Comparative Performance Evaluation of Sorting Algorithms
 
+An interactive terminal program that implements various sorting algorithms, including serial and parallel versions.
+
+## How to use
+
+Go to the file directory, run these comamnds in termianl:
+
+```shell
+# compile the .cpp file
+g++ -pthread main.cpp -std=c++11 -o main
+
+# run the executable file
+./main
+```
+
+When the program starts, please follow the below steps:
+
+1. Please select an algorithm to run
+
+   ```shell
+      Please select an algorithm to run:
+        |-->(1) insertion sort
+        |-->(2) merge sort
+        |-->(3) quick sort
+        |-->(4) optimized quick sort
+        |-->(5) bucket sort
+        |-->(6) parallel bucket sort(implemented in pthreads)
+   ```
+
+   You can type an unsigned integer, like 1, 2, ...
+
+   If you choose 6, you will have one more step:
+
+   ```shell
+     Please input the threads number, it can be <int> or <int[]>
+   ```
+
+   You can type an unsigned integer, like 1, 2, ...
+
+2. Please input the size of the array
+
+   ```shell
+     Please input the size of the array:
+   ```
+
+   You can type an unsigned integer, like 1, 2, ...
+
+3. Choose which kind of initial array do you want
+
+   ```shell
+     Please input the number: Which kind of initial array do you want?
+       |-->(1) random array
+       |-->(2) sorted array
+       |-->(3) reverse array
+       |-->(4) numerous duplications
+   ```
+
+   You can type a number from 1 to 4
+
+4. Choose how many times you want to run the sort algorithm
+
+   ```shell
+     How many times, N, do you want to run?
+   ```
+
+   You can type an unsigned integer, like 1, 2, ...
+
+5. The program will start to run, you can see the result on the terminal
+
 ## Abstract
 
 This article presents a comprehensive performance evaluation and comparison of four kinds of sorting algorithms: Insertion Sort, Merge Sort, Quick Sort and Optimized Quick Sort. Using different sizes and sequential circumstances to calculate the time cost and number of comparisons in order to evaluate and compare the three basic and one optimized sorting algorithms. This article considers two metrics: the number of comparisons and the time cost, and four different initial conditions in measuring the efficiency of difference algorithms.
@@ -18,7 +86,7 @@ Although comparison sorts all focus in one goal: to generate a sorted list of el
 
 The stimulation environment is run in a 2.7GHz Intel Core i7 running MacOS High Sierra. The IDE is Xcode 9.1 and the algorithms are written in C++. Five different array sizes are used: 10000, 20000, 30000, 40000 and 50000. I choose these sizes of numbers because they can show us a direct All the arrays are generated in random. All the point in figures are statistically meaningful, with 50 times run first.
 
-**Insertion sort**
+### Insertion sort
 
 Insertion sort is definitely not the most efficient algorithm but it is appraised by its simplicity. It builds a final sorted array one element at a time. It iterates through an input array and removes one element per iteration, finds the place the element belongs in the array, and then places it there. Since it is very easy to implement and adequately efficient for small number of elements, it is useful for people to use in certain kinds of circumstances. Usually, when the number of Array is less than 100, we can use insertion sort to complete the sorting issue. Besides, insertion sort is powerful when the sequence is almost sorted. In best-case, the time complexity of it will beO(n). However, the running time of insertion sort is O(n2), in average-case and worst-case. So if we want to sort a random unsorted array with a huge size, the performance of insertion sort will become extremely bad.
 
@@ -36,7 +104,7 @@ Insertion sort is definitely not the most efficient algorithm but it is appraise
 | Reversed | 0.262502 | 1.04695 | 2.4269 | 4.28468 | 6.6767 |
 | Duplicated | 0.125078 | 0.50346 | 1.2092 | 2.08798 | 3.38729 |
 
-**Merge Sort**
+### Merge Sort
 
 Merge sort focuses on how to merge two pre-sorted arrays together such that the resulting array is also sorted. Unlike insertion sort, merge sort has a time complexity of O(nlog(n)) in best-case, average-case, and worst-case. So it is efficient in all kinds of initial situations. The limit of this algorithm is its space inefficiency. Merge sort actually save its time by wasting more space, it is a kind of time-space trade off. A lot of temporary arrays have to be created and many copying of elements is involved during the operation, so the worst-case space complexity is O(n). Despite of this, the merge sort is still very proficient: it is stable and it is a truly O(nlog(n)) algorithm.
 
@@ -54,7 +122,7 @@ Merge sort focuses on how to merge two pre-sorted arrays together such that the 
 | Reversed | 0.00136524 | 0.00286246 | 0.004544 | 0.00574088 | 0.0075217 |
 | Duplicated | 0.00192388 | 0.00420078 | 0.00670894 | 0.00862678 | 0.0112535 |
 
-**Quick Sort**
+### Quick Sort
 
 Quick sort is one of the most widely used sorting algorithms. Indeed, it has plenty virtue: it is in-place, it is really fast since its inner loop is very short, and its typical time complexity is O(nlog(n)). However, quick sort has a fatal problem, it will become very slow when it is in worst-case situation, having a O(n2) time complexity. But the worst-case is not common, if the array contains random elements without having too many duplicates, using quick sort is still a wise choice.
 
@@ -72,23 +140,23 @@ Quick sort is one of the most widely used sorting algorithms. Indeed, it has ple
 | Reversed | 0.0957615 | 0.388007 | 0.916991 | 1.58424 | 2.48285 |
 | Duplicated | 0.0036941 | 0.00724664 | 0.0112629 | 0.0154369 | 0.0192974 |
 
-**Optimized Quick Sort**
+### Optimized Quick Sort
 
 Considering quick sort as a very efficient and popular algorithm, there are some optimizations to improve its performance. In this article, there are two different kinds of quick sort. One is a plain original one, implemented as the most basic method, the other is an optimized version. The optimized quick sort adopts some optimizations: picking the median as pivot, using two-way partitioning, using insertion sort when the sub array is in small size, and using tail recursion.
 
-1. 1)Picking median as pivot:
+1. Picking median as pivot:
 
 The common quick sort is used to choose the rightest or leftist element of the array as a pivot. When it chooses a biggest or smallest one as pivot, it will make the quick sort become insertion sort and thus reduce its performance dramatically. One solution is to choose the pivot randomly, so the probability to choose the extremely big or small element will reduce to lowest. Indeed, it is useful, however, there is still a chance to let the pivot be the worst. So we can compare three elements-right, middle, and left ones, and choose the median one as the pivot. So the algorithm will never choose the biggest or smallest element.
 
-1. 2)Two-way partitioning
+2. Two-way partitioning
 
 If the array has many duplicate elements, we can find that basic quick sort will become nearly O(n2), because when we are in the partition process, we put all the elements that are equal to pivot on one side of the array, so in those special initial situations the performance will become bad. What can we do to optimize it? The solution is to use two-way partitioning, that is, to compare the pivot both from two sides of the array instead of one side. This will put the duplicated elements on both side of the array uniformly.
 
-1. 3)Using insertion sort when the sub array is in small size
+3. Using insertion sort when the sub array is in small size
 
-With the partitions are going, the sub array&#39;s size go down and we can use insertion sort in replace. We can define a number, so that when the size of sub an array is less than it, we will change to sort them in insertion sort.
+With the partitions are going, the sub array's size go down and we can use insertion sort in replace. We can define a number, so that when the size of sub an array is less than it, we will change to sort them in insertion sort.
 
-1. 4)Using tail recursion
+4. Using tail recursion
 
 Quick sort needs extra space to recursive function calls, usually in worst case it needsO(n) space. Because that the recursive function appears after partition, so we can optimize it by using tail elimination. We convert it to recall only one recursive and reduce the extra space into O(logn) in worst-case.
 
@@ -106,7 +174,17 @@ Quick sort needs extra space to recursive function calls, usually in worst case 
 | Reversed | 0.00130454 | 0.00250766 | 0.00380722 | 0.0049461 | 0.00642398 |
 | Duplicated | 0.00166144 | 0.00332054 | 0.00516452 | 0.00704436 | 0.00889354 |
 
-#### Conclusion
+### Bucket Sort
+
+> Bucket sort, or bin sort, is a sorting algorithm that works by distributing the elements of an array into a number of buckets. Each bucket is then sorted individually, either using a different sorting algorithm, or by recursively applying the bucket sorting algorithm. It is a distribution sort, a generalization of pigeonhole sort, and is a cousin of radix sort in the most-to-least significant digit flavor. Bucket sort can be implemented with comparisons and therefore can also be considered a comparison sort algorithm. The computational complexity depends on the algorithm used to sort each bucket, the number of buckets to use, and whether the input is uniformly distributed. (From [Wiki](https://en.wikipedia.org/wiki/Bucket_sort))
+
+Here, the Bucket Sort is implemented in using Insertion Sort in each bucket. The number of Buckets is set to half of the size of random array. Each bucket will cover a range of value, which is the `(maxValue - minValue + 1) / numBucket`.
+
+### Parallel Bucket Sort
+
+A parallel version of Bucket Sort, using [pthreads](https://en.wikipedia.org/wiki/POSIX_Threads) to create workers to sort concurrently. Ideally, the number of threads should be reasonable to the size of random array.
+
+## Conclusion
 
 From the previous result we can get the conclusions as follows:
 
