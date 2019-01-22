@@ -22,7 +22,7 @@ using namespace std;
 struct thread_data{
     int thread_id;
     int thread_total;
-    vector<int> *A;
+    vector<int> *buckets;
     unsigned int numComparisons;
 };
 
@@ -32,7 +32,7 @@ void mergeSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo);
 void quickSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo);
 void quickSortOpti(vector<int> &A, unsigned int &numComparisons, clock_t &tempo);
 void bucketSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo);
-void bucketSort_pthreads(vector<int> &A, unsigned int &numComparisons, clock_t &tempo);
+void bucketSort_pthreads(vector<int> &A, unsigned int &numComparisons, clock_t &tempo, unsigned int &num_threads);
 
 //Some auxiliary functions
 void populateVectorRandom(vector<int> &A, double m, int flag);
@@ -70,6 +70,10 @@ int main()
              << "   |-->(5) bucket sort\n"
              << "   |-->(6) parallel bucket sort(implemented in pthreads)\n" << endl;
         cin >> choice;
+        if(choice == 6) {
+            cout << "Please input the threads number, it can be <int> or <int[]>" << endl;
+            cin >> num_threads;
+        }
         cout << "Please input the size of the array:" << endl;
         cin >> size;
         cout << "Please input the number: Which kind of initial array do you want?" << endl;
@@ -80,6 +84,7 @@ int main()
         cin >> flag;
         cout << "How many times, N, do you want to run?" << endl;
         cin >> numRun;
+        cout << "Initializing....Running...." << endl;
 
         vector<int> A(size, 0);
 
@@ -178,14 +183,14 @@ int main()
                 populateVectorRandom(A, size, flag);
                 cout << "********************************************\n"
                      << endl;
-                cout << "The unsorted array using BucketSort:" << endl;
+                cout << "The unsorted array using BucketSort:\n" << endl;
                 printVector(A);
 
                 bucketSort(A, numComparisons, tempo);
 
                 cout << "********************************************\n"
                      << endl;
-                cout << "The sorted array using BucketSort:" << endl;
+                cout << "The sorted array using BucketSort:\n" << endl;
                 printVector(A);
 
                 A7[i] = numComparisons;
@@ -209,7 +214,7 @@ int main()
                 cout << "The unsorted array using BucketSort:" << endl;
                 printVector(A);
 
-                bucketSort_pthreads(A, numComparisons, tempo);
+                bucketSort_pthreads(A, numComparisons, tempo, num_threads);
 
                 cout << "********************************************\n"
                      << endl;
@@ -535,21 +540,24 @@ void bucketSort(vector<int> &A, unsigned int &numComparisons, clock_t &tempo)
 void* thread_insertion_sort(void* threadarg) {
 
     struct thread_data *local_data = (struct thread_data *) threadarg;
-    unsigned int numComparisons = 0;
     int partition = local_data->thread_id;
     int thread_total = local_data->thread_total;
-    std::vector<int>* A = local_data->A;
+    std::vector<int>* buckets = local_data->buckets;
 
     // calculate the partition range
-    int range = A->size() / thread_total;
-    if(range * thread_total < A->size()) {
+    int range = buckets->size() / thread_total;
+    if(range * thread_total < buckets->size()) {
         range += 1;
     }
 
     if(partition == thread_total - 1) {
-        insertionSortImple(*A, partition * range, A->size(), numComparisons);
+        for(int i = partition * range; i < buckets->size(); i++) {
+            insertionSortImple(*buckets, 0, buckets[i].size(), local_data->numComparisons);
+        }
     } else {
-        insertionSortImple(*A, partition * range, (partition + 1) * range, numComparisons);
+        for(int i = partition * range; i < (partition + 1) * range; i++) {
+            insertionSortImple(*buckets, 0, buckets[i].size(), local_data->numComparisons);
+        }
     }
 
     pthread_exit(NULL);
@@ -559,15 +567,17 @@ void* thread_insertion_sort(void* threadarg) {
  * Worker threads creator
  */
 
-void threads_factory(std::vector<int> &A, int num_threads) {
+void threads_factory(std::vector<int> &buckets, int num_threads, unsigned int &numComparisons) {
     pthread_t threads[num_threads];
     struct thread_data thread_data_array[num_threads];
 
     // create threads and start work
+    cout << "creating "<< num_threads << " threads........." << endl;
     for(int tid = 0; tid < num_threads; tid++) {
         thread_data_array[tid].thread_id = tid;
-        thread_data_array[tid].A = &A;
+        thread_data_array[tid].buckets = &buckets;
         thread_data_array[tid].thread_total = num_threads;
+        thread_data_array[tid].numComparisons = 0;
 
         int rc = pthread_create(&threads[tid], NULL, thread_insertion_sort, (void *) &thread_data_array[tid]);
 
@@ -586,12 +596,16 @@ void threads_factory(std::vector<int> &A, int num_threads) {
             return;
         }
     }
+
+    for(int tid = 0; tid < num_threads; tid++) {
+        numComparisons += thread_data_array[tid].numComparisons;
+    }
 }
 
 /**
  * Implementation of parallel bucket sort using pthreads
  */
-void bucketSort_pthreads_imple(std::vector<int> &A, unsigned int &numComparisons)
+void bucketSort_pthreads_imple(std::vector<int> &A, unsigned int &numComparisons, unsigned int &num_threads)
 {
     unsigned int numOfElements = A.size();
 
@@ -625,22 +639,13 @@ void bucketSort_pthreads_imple(std::vector<int> &A, unsigned int &numComparisons
     for (int i = 0; i < numOfElements; i++)
     {
 
-        int bucketIndex = std::floor((A[i] - minValue) / rangePerBucket);
+        int bucketIndex = static_cast<int>(std::floor((A[i] - minValue) / rangePerBucket));
 
         buckets[bucketIndex].push_back(A[i]);
     }
-//
-//    // sort each bucket's element in specific sorting algorithm, here uses Insertion sort
-//    for (int i = 0; i < bucketNum; i++)
-//    {
-//        if (buckets[i].size() > 0)
-//        {
-////            cout << "Each elements in bucket[" << i << "]: " << endl;
-//            insertionSortImple(buckets[i], 0, buckets[i].size(), numComparisons);
-////            printVector(buckets[i]);
-//        }
-//    }
-    threads_factory(A, 2);
+
+    // start thread workers
+    threads_factory(*buckets, num_threads, numComparisons);
 
     // reduce the elements back to original array
     int index = 0;
@@ -653,12 +658,11 @@ void bucketSort_pthreads_imple(std::vector<int> &A, unsigned int &numComparisons
     }
 }
 
-void bucketSort_pthreads(vector<int> &A, unsigned int &numComparisons, clock_t &tempo)
+void bucketSort_pthreads(vector<int> &A, unsigned int &numComparisons, clock_t &tempo, unsigned int &num_threads)
 {
-    unsigned int size = A.size();
     clock_t start, end;
     start = clock();
-    bucketSort_pthreads_imple(A, numComparisons);
+    bucketSort_pthreads_imple(A, numComparisons, num_threads);
     end = clock();
     tempo = end - start;
 }
@@ -720,7 +724,7 @@ void printVector(vector<int> A)
     {
         // Set a threshold to print
         if (n >= 20) {
-            cout << "only showing "<< n << "elements, omit remainning......";
+            cout << "only showing "<< n << " elements, omit remaining......";
             break;
         }
         cout << i << "\t";
@@ -775,7 +779,7 @@ void cauculateConfidence(vector<double> &A, vector<float> &B, unsigned int &comp
     float x2 = 0.0, s2 = 0.0;
     x1 = accumulate(begin(A), end(A), 0.0);
     x1 = x1 / A.size();
-    x2 = accumulate(begin(B), end(B), 0.0);
+    x2 = static_cast<float>(accumulate(begin(B), end(B), 0.0));
     x2 = x2 / B.size();
     for (int i = 0; i < 50; i++)
     {
@@ -785,11 +789,11 @@ void cauculateConfidence(vector<double> &A, vector<float> &B, unsigned int &comp
     s1 = s1 / (A.size() - 1);
     s2 = s2 / (B.size() - 1);
 
-    meanTime = x1;
-    meanCompare = x2;
+    meanCompare = static_cast<float>(x1);
+    meanTime = x2;
 
-    compare = (int)(1536.64 * s1 / pow(x1, 2));
-    time = (int)(1536.64 * s2 / pow(x2, 2));
+    compare = (unsigned int)(1536.64 * s1 / pow(x1, 2));
+    time = (unsigned int)(1536.64 * s2 / pow(x2, 2));
     //cout << time << endl;
 
     //    for(int i = 0; i < 50; i++) {
@@ -802,13 +806,13 @@ void cauculateConfidence(vector<double> &A, vector<float> &B, unsigned int &comp
 
 void printResult(unsigned int compare, unsigned int time, float meanTime, double meanComparison)
 {
-    cout << "The n for Comparisons: " << endl;
-    cout << compare << endl;
-    cout << "The n for Time: " << endl;
-    cout << time << endl;
-    cout << "The mean value comparisons : " << endl;
+//    cout << "The n for Comparisons: " << endl;
+//    cout << compare << endl;
+//    cout << "The n for Time: " << endl;
+//    cout << time << endl;
+    cout << "The mean value of time : " << endl;
     cout << meanTime << endl;
-    cout << "The mean value of time: " << endl;
+    cout << "The mean value of comparisons: " << endl;
     cout << meanComparison << endl;
 }
 
