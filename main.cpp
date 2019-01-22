@@ -682,7 +682,7 @@ void populateVectorRandom(vector<int> &A, double m, int flag)
     uniform_int_distribution<> range2(0, (int)A.size() / 50);
     uniform_int_distribution<> range3(0, 10);
 
-    //Pupulate random numbers into vectors
+    //Populate random numbers into vectors
     if (flag == 1)
     {
         for (double i = 0; i < A.size(); i++)
